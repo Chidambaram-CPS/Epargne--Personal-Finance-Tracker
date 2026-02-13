@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – Money Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen p-6">
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <header class="flex justify-between items-center mb-8">
+      <!-- Logo Placeholder -->
+      <div id="logo" class="h-6 w-32 bg-slate-700 rounded opacity-60" aria-label="Money Tracker Logo"></div>
+      <!-- User Profile Icon -->
+      <div id="user-profile" class="w-10 h-10 bg-slate-700 rounded-full opacity-60 cursor-pointer" aria-label="User Profile"></div>
+    </header>
+
+    <!-- Total Spent Summary Card -->
+    <section id="total-spent-section" class="mb-8">
+      <div class="bg-indigo-600/80 rounded-2xl p-6">
+        <!-- Label -->
+        <div class="h-4 w-24 bg-white/40 rounded mb-3" aria-label="Total Spent Label"></div>
+        <!-- Amount Display -->
+        <div id="total-amount" class="h-8 w-40 bg-white/60 rounded" aria-label="Total Amount Spent"></div>
+      </div>
+    </section>
+
+    <!-- Expense Categories Section -->
+    <section id="categories-section">
+      <!-- Section Title -->
+      <h2 class="h-8 w-40 bg-white/60 rounded mb-4 animate-pulse" id="categories-title">Categories</h2>
+      
+      <!-- Category Cards Grid -->
+      <div id="cards-container" class="grid grid-cols-2 gap-4">
+        
+        <!-- Category Card 1 -->
+        <div id="category-card-1" class="card bg-slate-800 p-4 rounded-xl space-y-3" data-category="food">
+          <div class="card-label h-3 w-20 bg-slate-600 rounded opacity-50"></div>
+          <div class="card-amount h-5 w-24 bg-slate-500 rounded opacity-60"></div>
+        </div>
+
+        <!-- Category Card 2 -->
+        <div id="category-card-2" class="card bg-slate-800 p-4 rounded-xl space-y-3" data-category="transport">
+          <div class="card-label h-3 w-20 bg-slate-600 rounded opacity-50"></div>
+          <div class="card-amount h-5 w-24 bg-slate-500 rounded opacity-60"></div>
+        </div>
+
+        <!-- Category Card 3 -->
+        <div id="category-card-3" class="card bg-slate-800 p-4 rounded-xl space-y-3" data-category="entertainment">
+          <div class="card-label h-3 w-20 bg-slate-600 rounded opacity-50"></div>
+          <div class="card-amount h-5 w-24 bg-slate-500 rounded opacity-60"></div>
+        </div>
+
+        <!-- Category Card 4 -->
+        <div id="category-card-4" class="card bg-slate-800 p-4 rounded-xl space-y-3" data-category="utilities">
+          <div class="card-label h-3 w-20 bg-slate-600 rounded opacity-50"></div>
+          <div class="card-amount h-5 w-24 bg-slate-500 rounded opacity-60"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="./js/dashboard.js"></script>
+</body>
+</html>

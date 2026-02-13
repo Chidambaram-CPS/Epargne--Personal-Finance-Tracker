@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Insights</title>
+
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --card: #ffffff;
+      --text: #111;
+      --muted: #777;
+      --border: #e5e7eb;
+      --primary: #000;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      padding-bottom: 24px;
+    }
+
+    /* HEADER */
+    header {
+      height: 56px;
+      background: var(--card);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* MONTH SELECTOR */
+    .month {
+      margin: 16px;
+      height: 44px;
+      background: var(--card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      color: var(--muted);
+    }
+
+    /* SECTION */
+    .section {
+      margin: 20px 16px 0;
+    }
+
+    .section h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    /* CHART PLACEHOLDER */
+    .chart {
+      height: 220px;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .chart.small {
+      height: 160px;
+    }
+
+    /* TABLET CENTER */
+    @media (min-width: 768px) {
+      .app {
+        max-width: 420px;
+        margin: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <h1>Insights</h1>
+  </header>
+
+  <!-- MONTH SELECTOR -->
+  <div class="month">
+    <span>Month / Year</span>
+    <span>▼</span>
+  </div>
+
+  <!-- CATEGORY BREAKDOWN -->
+  <div class="section">
+    <h2>Category Breakdown</h2>
+    <div class="chart">
+      Pie Chart Placeholder
+    </div>
+  </div>
+
+  <!-- SPENDING TREND -->
+  <div class="section">
+    <h2>Spending Trend</h2>
+    <div class="chart small">
+      Line Chart Placeholder
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
