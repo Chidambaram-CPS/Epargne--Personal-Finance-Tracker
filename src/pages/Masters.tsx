@@ -1,64 +1,77 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from '@/components/ui/combined';
 import { Plus, Trash2, Tags, Wallet } from 'lucide-react';
 
+interface MasterItem {
+    id: string;
+    name: string;
+    type: 'category' | 'wallet';
+    color?: string;
+    icon?: string;
+}
+
 export function Masters() {
     const { user, token } = useAuth();
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<MasterItem[]>([]);
     const [activeTab, setActiveTab] = useState<'category' | 'wallet'>('category');
     const [newName, setNewName] = useState('');
 
-    useEffect(() => {
-        loadMasters();
-    }, [activeTab]);
+    const loadMasters = useCallback(async () => {
+        if (!user?.id || !token) return;
 
-    const loadMasters = async () => {
         try {
-            const data = await apiRequest<any[]>(`/masters?userId=${user?.id}&type=${activeTab}`, { token: token! });
+            const data = await apiRequest<MasterItem[]>(`/masters?userId=${user.id}&type=${activeTab}`, { token });
             setItems(data);
         } catch (err) {
-            console.error(err);
+            console.error('Failed to load masters:', err);
         }
-    };
+    }, [user?.id, token, activeTab]);
 
-    const handleAdd = async (e: React.FormEvent) => {
+    useEffect(() => {
+        loadMasters();
+    }, [loadMasters]);
+
+    const handleAdd = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newName) return;
+        if (!newName || !user?.id || !token) return;
 
         try {
             await apiRequest('/masters', {
                 method: 'POST',
-                token: token!,
+                token,
                 body: JSON.stringify({
-                    user_id: user?.id,
+                    user_id: user.id,
                     type: activeTab,
                     name: newName,
-                    color: 'bg-gray-100', // Default for now
+                    color: 'bg-gray-100',
                     icon: 'tag'
                 })
             });
-            loadMasters();
+            await loadMasters();
             setNewName('');
         } catch (err) {
+            console.error('Failed to add master:', err);
             alert('Failed to add ' + activeTab);
         }
-    };
+    }, [newName, user?.id, token, activeTab, loadMasters]);
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = useCallback(async (id: string) => {
         if (!confirm('Delete this item?')) return;
+        if (!user?.id || !token) return;
+
         try {
             await apiRequest(`/masters/${id}`, {
                 method: 'DELETE',
-                token: token!,
-                body: JSON.stringify({ user_id: user?.id })
+                token,
+                body: JSON.stringify({ user_id: user.id })
             });
-            loadMasters();
+            await loadMasters();
         } catch (err) {
-            console.error(err);
+            console.error('Failed to delete master:', err);
         }
-    };
+    }, [user?.id, token, loadMasters]);
 
     return (
         <div className="space-y-6">

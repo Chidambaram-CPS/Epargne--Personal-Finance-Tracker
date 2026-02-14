@@ -1,7 +1,14 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from '@/components/ui/combined';
+
+// Simple HTML escaping function to prevent XSS
+const escapeHtml = (text: string): string => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+};
 
 export function Login() {
     const { login } = useAuth();
@@ -12,7 +19,7 @@ export function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
@@ -32,11 +39,17 @@ export function Login() {
                 login(res.token, res.user);
             }
         } catch (err: any) {
-            setError(err.message);
+            const errorMessage = err?.message || 'An unexpected error occurred';
+            setError(escapeHtml(errorMessage));
         } finally {
             setLoading(false);
         }
-    };
+    }, [isLogin, email, password, name, login]);
+
+    const toggleMode = useCallback(() => {
+        setIsLogin(!isLogin);
+        setError('');
+    }, [isLogin]);
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -98,7 +111,7 @@ export function Login() {
 
                     <div className="mt-6 text-center text-sm">
                         <button
-                            onClick={() => setIsLogin(!isLogin)}
+                            onClick={toggleMode}
                             className="text-muted-foreground hover:text-primary transition-colors"
                         >
                             {isLogin ? "First time? Initialize Vault" : "Already have a vault? Unlock"}

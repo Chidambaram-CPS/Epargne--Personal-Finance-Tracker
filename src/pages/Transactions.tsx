@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from '@/components/ui/combined';
 import { Plus, Trash2, Search } from 'lucide-react';
 
+interface Transaction {
+    id: string;
+    type: 'income' | 'expense';
+    amount: number;
+    description: string;
+    category: string;
+    wallet: string;
+    date: string;
+}
+
 export function Transactions() {
     const { user, token } = useAuth();
-    const [transactions, setTransactions] = useState<any[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0],
@@ -17,52 +27,66 @@ export function Transactions() {
         description: ''
     });
 
-    useEffect(() => {
-        loadTransactions();
-    }, []);
+    const loadTransactions = useCallback(async () => {
+        if (!user?.id || !token) return;
 
-    const loadTransactions = async () => {
         try {
-            const data = await apiRequest<any[]>('/transactions?userId=' + user?.id, { token: token! });
+            const data = await apiRequest<Transaction[]>(`/transactions?userId=${user.id}`, { token });
             setTransactions(data);
         } catch (err) {
-            console.error(err);
+            console.error('Failed to load transactions:', err);
         }
-    };
+    }, [user?.id, token]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    useEffect(() => {
+        loadTransactions();
+    }, [loadTransactions]);
+
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user?.id || !token) return;
+
         try {
             await apiRequest('/transactions', {
                 method: 'POST',
-                token: token!,
+                token,
                 body: JSON.stringify({
-                    user_id: user?.id,
+                    user_id: user.id,
                     ...formData,
                     amount: parseFloat(formData.amount)
                 })
             });
             setIsFormOpen(false);
-            loadTransactions();
-            setFormData({ ...formData, amount: '', description: '' });
+            await loadTransactions();
+            setFormData({ 
+                date: new Date().toISOString().split('T')[0],
+                amount: '', 
+                type: 'expense',
+                category: '',
+                wallet: 'Cash',
+                description: '' 
+            });
         } catch (err) {
+            console.error('Failed to add transaction:', err);
             alert('Failed to add transaction');
         }
-    };
+    }, [user?.id, token, formData, loadTransactions]);
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = useCallback(async (id: string) => {
         if (!confirm('Are you sure?')) return;
+        if (!user?.id || !token) return;
+
         try {
             await apiRequest(`/transactions/${id}`, {
                 method: 'DELETE',
-                token: token!,
-                body: JSON.stringify({ user_id: user?.id })
+                token,
+                body: JSON.stringify({ user_id: user.id })
             });
-            loadTransactions();
+            await loadTransactions();
         } catch (err) {
-            console.error(err);
+            console.error('Failed to delete transaction:', err);
         }
-    };
+    }, [user?.id, token, loadTransactions]);
 
     return (
         <div className="space-y-6">
