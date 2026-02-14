@@ -1,29 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/combined';
 import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet } from 'lucide-react';
 
+interface Transaction {
+    id: string;
+    type: 'income' | 'expense';
+    amount: number;
+    description: string;
+    category: string;
+    wallet: string;
+    date: string;
+}
+
 export function Dashboard() {
     const { token, user } = useAuth();
     const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
-    const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+    const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    const loadData = useCallback(async () => {
+        if (!user?.id || !token) return;
 
-    const loadData = async () => {
+        setIsLoading(true);
+        setError(null);
         try {
-            const transactions = await apiRequest<any[]>('/transactions?userId=' + user?.id, { token: token! });
+            const transactions = await apiRequest<Transaction[]>(`/transactions?userId=${user.id}`, { token });
 
             const income = transactions
-                .filter((t: any) => t.type === 'income')
-                .reduce((sum: number, t: any) => sum + t.amount, 0);
+                .filter((t) => t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0);
 
             const expense = transactions
-                .filter((t: any) => t.type === 'expense')
-                .reduce((sum: number, t: any) => sum + t.amount, 0);
+                .filter((t) => t.type === 'expense')
+                .reduce((sum, t) => sum + t.amount, 0);
 
             setStats({
                 income,
@@ -33,9 +45,36 @@ export function Dashboard() {
 
             setRecentTransactions(transactions.slice(0, 5));
         } catch (err) {
-            console.error(err);
+            console.error('Failed to load dashboard data:', err);
+            setError('Failed to load data');
+        } finally {
+            setIsLoading(false);
         }
-    };
+    }, [user?.id, token]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const savingsRate = useMemo(() => {
+        return stats.income > 0 ? ((stats.balance / stats.income) * 100).toFixed(1) : '0';
+    }, [stats.income, stats.balance]);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-destructive">{error}</div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">
@@ -82,7 +121,7 @@ export function Dashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-blue-500">
-                            {stats.income > 0 ? ((stats.balance / stats.income) * 100).toFixed(1) : 0}%
+                            {savingsRate}%
                         </div>
                     </CardContent>
                 </Card>

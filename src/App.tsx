@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { Login } from '@/pages/Login';
@@ -10,6 +10,10 @@ import { DevToolsDetector } from '@/components/Security/DevToolsDetector';
 function AppContent() {
     const { user, isLoading } = useAuth();
     const [activePage, setActivePage] = useState('dashboard');
+
+    const handleNavigate = useCallback((page: string) => {
+        setActivePage(page);
+    }, []);
 
     if (isLoading) {
         return (
@@ -31,11 +35,11 @@ function AppContent() {
     return (
         <>
             <DevToolsDetector />
-            <Layout activePage={activePage} onNavigate={setActivePage}>
+            <Layout activePage={activePage} onNavigate={handleNavigate}>
                 {activePage === 'dashboard' && <Dashboard />}
                 {activePage === 'transactions' && <Transactions />}
                 {activePage === 'masters' && <Masters />}
-                {activePage === 'wallet' && <Masters />} {/* Reusing Masters for wallet management for simplicity for now */}
+                {activePage === 'wallet' && <Masters />}
                 {activePage === 'settings' && <div className="p-10 text-center text-muted-foreground">Settings Coming Soon</div>}
             </Layout>
         </>

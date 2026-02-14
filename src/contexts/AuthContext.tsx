@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 
 interface User {
@@ -27,28 +27,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedUser = localStorage.getItem('user');
 
         if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setToken(storedToken);
+                setUser(parsedUser);
+            } catch (error) {
+                console.error('Failed to parse stored user data:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+            }
         }
         setIsLoading(false);
     }, []);
 
-    const login = (newToken: string, newUser: User) => {
+    const login = useCallback((newToken: string, newUser: User) => {
         setToken(newToken);
         setUser(newUser);
         localStorage.setItem('token', newToken);
         localStorage.setItem('user', JSON.stringify(newUser));
-    };
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setToken(null);
         setUser(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-    };
+    }, []);
+
+    const value = useMemo(
+        () => ({ user, token, login, logout, isLoading }),
+        [user, token, login, logout, isLoading]
+    );
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

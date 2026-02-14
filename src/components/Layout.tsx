@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/combined';
 import {
@@ -18,9 +18,22 @@ interface LayoutProps {
     onNavigate: (page: string) => void;
 }
 
-export function Layout({ children, activePage, onNavigate }: LayoutProps) {
+export const Layout = React.memo(function Layout({ children, activePage, onNavigate }: LayoutProps) {
     const { user, logout } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+    const handleNavigate = useCallback((page: string) => {
+        onNavigate(page);
+        setIsMobileMenuOpen(false);
+    }, [onNavigate]);
+
+    const toggleMobileMenu = useCallback(() => {
+        setIsMobileMenuOpen(prev => !prev);
+    }, []);
+
+    const closeMobileMenu = useCallback(() => {
+        setIsMobileMenuOpen(false);
+    }, []);
 
     const menuItems = [
         { id: 'dashboard', label: 'Command Center', icon: LayoutDashboard },
@@ -42,7 +55,7 @@ export function Layout({ children, activePage, onNavigate }: LayoutProps) {
                         <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
                             Épargne
                         </h1>
-                        <button className="md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+                        <button className="md:hidden" onClick={closeMobileMenu}>
                             <X className="w-6 h-6" />
                         </button>
                     </div>
@@ -51,10 +64,7 @@ export function Layout({ children, activePage, onNavigate }: LayoutProps) {
                         {menuItems.map((item) => (
                             <button
                                 key={item.id}
-                                onClick={() => {
-                                    onNavigate(item.id);
-                                    setIsMobileMenuOpen(false);
-                                }}
+                                onClick={() => handleNavigate(item.id)}
                                 className={`
                   flex items-center w-full p-3 rounded-lg transition-all duration-200
                   ${activePage === item.id
@@ -89,7 +99,7 @@ export function Layout({ children, activePage, onNavigate }: LayoutProps) {
             <main className="flex-1 min-h-screen overflow-y-auto">
                 <div className="p-4 md:hidden flex items-center justify-between border-b bg-background/50 backdrop-blur">
                     <h1 className="font-bold text-lg">Épargne</h1>
-                    <button onClick={() => setIsMobileMenuOpen(true)}>
+                    <button onClick={toggleMobileMenu}>
                         <Menu className="w-6 h-6" />
                     </button>
                 </div>
@@ -99,4 +109,4 @@ export function Layout({ children, activePage, onNavigate }: LayoutProps) {
             </main>
         </div>
     );
-}
+});
